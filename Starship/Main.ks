@@ -10,7 +10,7 @@ global ForeAngleToVel is 0.
 // global padLAT is -0.097724.
 // global PadLNG is -74.55765.
 global padLAT is -0.09721.
-global PadLNG is -74.55766.
+global PadLNG is -74.55766 - 0.001.
 global latDiff is 0.
 global lngDiff is 0.
 
@@ -280,7 +280,7 @@ function SetFlaps{
         }
     }
 
-    set myRoll to lngDiff * 5000 + (lngSpeed/18).
+    set myRoll to lngDiff * 5000 + (lngSpeed/10).
     if (myRoll >11){
         set myRoll to 11.
     }
@@ -331,8 +331,8 @@ function SetFlaps{
 
 
     ///////////////////////////////////////// SET FLAPS
-    local max is 10.
-    set cc to (latDiff+0.0045)*2000.
+    local max is 11.
+    set cc to (latDiff+0.00445)*3000.
         if (cc>max){
             set cc to max.
         }
