@@ -83,7 +83,7 @@ until false {
         printComp().  
         local x is 100.  
         
-        LOCK STEERING TO Up + R((-latDiff*500)+15,-lngDiff*500,180).
+        LOCK STEERING TO Up + R((-latDiff*100)+2,-lngDiff*500,180).
         set th to 0.
         if (ship:altitude<targetAltitude/4){
             set th to 0.7.
@@ -280,9 +280,9 @@ function SetFlaps{
         }
     }
 
-    set myRoll to lngDiff * 5000 + (lngSpeed/20).
-    if (myRoll >10){
-        set myRoll to 10.
+    set myRoll to lngDiff * 5000 + (lngSpeed/18).
+    if (myRoll >11){
+        set myRoll to 11.
     }
     set RollDiff to RollDiff + myRoll.
 
@@ -331,8 +331,8 @@ function SetFlaps{
 
 
     ///////////////////////////////////////// SET FLAPS
-    local max is 7.
-    set cc to (latDiff+0.006)*600.
+    local max is 10.
+    set cc to (latDiff+0.0045)*2000.
         if (cc>max){
             set cc to max.
         }
