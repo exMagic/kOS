@@ -83,7 +83,7 @@ until false {
         printComp().  
         local x is 100.  
         
-        LOCK STEERING TO Up + R((-latDiff*500)+3,-lngDiff*500,180).
+        LOCK STEERING TO Up + R((-latDiff*500)+15,-lngDiff*500,180).
         set th to 0.
         if (ship:altitude<targetAltitude/4){
             set th to 0.7.
@@ -260,7 +260,7 @@ function SetFlaps{
 
     ///////////////////////////////////////////// ROLL
     local RollReactionMultiFactor is 0.5.
-    local RollBreakMultiFactor is 1.5.
+    local RollBreakMultiFactor is 1.2.
     /////////// ROLL SPEED
     if (time:seconds-lastCount2>0.1){
         set lastCount2 to  time:seconds.
@@ -281,8 +281,8 @@ function SetFlaps{
     }
 
     set myRoll to lngDiff * 5000 + (lngSpeed/20).
-    if (myRoll >16){
-        set myRoll to 16.
+    if (myRoll >10){
+        set myRoll to 10.
     }
     set RollDiff to RollDiff + myRoll.
 
@@ -331,12 +331,13 @@ function SetFlaps{
 
 
     ///////////////////////////////////////// SET FLAPS
-    set cc to (latDiff+0.012)*300.
-        if (cc>5){
-            set cc to 5.
+    local max is 7.
+    set cc to (latDiff+0.006)*600.
+        if (cc>max){
+            set cc to max.
         }
-        if (cc <-5){
-            set cc to -5.
+        if (cc <-max){
+            set cc to -max.
     }
 
     set TLHAngle to TopFlapAngle+cc + leftOffset + pichSpeed*PitchBreakMultiFactor + YawOffset.
