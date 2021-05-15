@@ -7,6 +7,15 @@ global StarAngle is 0.
 global TopAngle is 0.
 global StarNorthAngle is 0.
 global ForeAngleToVel is 0.
+// global padLAT is -0.097724.
+// global PadLNG is -74.55765.
+global padLAT is -0.09721.
+global PadLNG is -74.55766.
+global latDiff is 0.
+global lngDiff is 0.
+
+global myRoll is 0.
+global cc is 0.
 
 global RollDiff is 0.
 global YawDiff is 0.
@@ -14,15 +23,18 @@ global YawDiff is 0.
 global pichSpeed is 0.
 global rollSpeed is 0.
 global yawSpeed is 0.
+global latSpeed is 0.
+global lngSpeed is 0.
 
 global rightOffset is 0.
 global leftOffset is 0.
 global YawOffset is 0.
-global YawLeftOffset is 0.
 
 global previousPitch is 0.
 global previousRoll is 0.
 global previousYaw is 0.
+global previousLat is 0.
+global previousLng is 0.
 
 global TLHAngle is 0.
 global TRHAngle is 0.
@@ -43,6 +55,8 @@ global myStage is 0.
 global lastCount is 0.
 global lastCount2 is 0.
 global lastCount3 is 0.
+global lastCount4 is 0.
+global lastCount5 is 0.
 
 global th is 0.
 global TouchAltitude is 20.
@@ -66,9 +80,10 @@ until false {
         //climb
         SetOrient().
         DrawVec().
-        printComp().    
+        printComp().  
+        local x is 100.  
         
-        LOCK STEERING TO Up + R(0,0,180).
+        LOCK STEERING TO Up + R((-latDiff*500)+3,-lngDiff*500,180).
         set th to 0.
         if (ship:altitude<targetAltitude/4){
             set th to 0.7.
@@ -110,11 +125,12 @@ until false {
     until myStage=3{
         //desent
         SetOrient().
+        
         DrawVec().
         printComp().    
         SetFlaps().
         UNLOCK STEERING.
-        if ship:altitude<660{
+        if ship:altitude<680{
             set myStage to myStage + 1.
         }
     }
@@ -152,7 +168,7 @@ until false {
         partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bottom left
         }
         if ship:altitude < 100{
-            set th to th + (-ship:VERTICALSPEED/20).
+            set th to th + (-ship:VERTICALSPEED/15).
             LOCK STEERING TO Up + R(0,0,180).
         }
 
@@ -182,6 +198,21 @@ function GetForeAngleToVel{
 }
 
 function SetOrient{
+    set latDiff to padLAT - SHIP:GEOPOSITION:LAT.
+    set lngDiff to PadLNG - SHIP:GEOPOSITION:LNG.
+
+        if (time:seconds-lastCount4>0.1){
+        set lastCount4 to  time:seconds.
+
+        set newLat to SHIP:GEOPOSITION:LAT.
+        set latSpeed to (previousLat - newLat).
+        set previousLat to newLat.  
+
+        set newLng to SHIP:GEOPOSITION:LNG.
+        set lngSpeed to (previousLng - newLng).
+        set previousLng to newLng.               
+    }
+
     set ForeAngle to GetForeAngleToUP().
     set StarAngle to GetStarAngleToUP().
     set TopAngle to GetTopAngleToUP().
@@ -229,7 +260,7 @@ function SetFlaps{
 
     ///////////////////////////////////////////// ROLL
     local RollReactionMultiFactor is 0.5.
-    local RollBreakMultiFactor is 1.
+    local RollBreakMultiFactor is 1.5.
     /////////// ROLL SPEED
     if (time:seconds-lastCount2>0.1){
         set lastCount2 to  time:seconds.
@@ -240,14 +271,21 @@ function SetFlaps{
     /////////// CALCULATE ROLL
 
     if(TopAngle<90){//roof is on top
-        set RollDiff to StarAngle - 90.
+        set RollDiff to StarAngle - 90 .
     }else{
         if(StarAngle>90){
-            set RollDiff to TopAngle.
+            set RollDiff to TopAngle .
         }else{
-            set RollDiff to TopAngle * -1.
+            set RollDiff to TopAngle * -1 .
         }
     }
+
+    set myRoll to lngDiff * 5000 + (lngSpeed/20).
+    if (myRoll >16){
+        set myRoll to 16.
+    }
+    set RollDiff to RollDiff + myRoll.
+
     if (RollDiff<0){//lean to left
         set rightOffset to RollDiff * RollReactionMultiFactor + rollSpeed * RollBreakMultiFactor.
         set leftOffset to 0.
@@ -261,8 +299,8 @@ function SetFlaps{
 
 
     //////////////////////////////////////////// YAW
-    local YawReactionMultiFactor is 0.2.
-    local YawBreakMultiFactor is 0.2.
+    local YawReactionMultiFactor is 0.3.
+    local YawBreakMultiFactor is 0.3.
     /////////// YAW SPEED
     if (time:seconds-lastCount3>0.1){
         set lastCount3 to  time:seconds.
@@ -285,10 +323,24 @@ function SetFlaps{
     set YawOffset to YawDiff * YawReactionMultiFactor + yawSpeed*YawBreakMultiFactor + yawSpeed.
 
 
-    ///////////////////////////////////////// SET FLAPS
+    //////////////////////////////////////////// NAVIGATION
+    ////////////////  SPEED
 
-    set TLHAngle to TopFlapAngle + leftOffset + pichSpeed*PitchBreakMultiFactor + YawOffset.
-    set TRHAngle to TopFlapAngle + rightOffset + pichSpeed*PitchBreakMultiFactor - YawOffset.
+    ////////////////  LNG SPEED
+
+
+
+    ///////////////////////////////////////// SET FLAPS
+    set cc to (latDiff+0.012)*300.
+        if (cc>5){
+            set cc to 5.
+        }
+        if (cc <-5){
+            set cc to -5.
+    }
+
+    set TLHAngle to TopFlapAngle+cc + leftOffset + pichSpeed*PitchBreakMultiFactor + YawOffset.
+    set TRHAngle to TopFlapAngle+cc + rightOffset + pichSpeed*PitchBreakMultiFactor - YawOffset.
     set BLHAngle to BottomFlapAngle + leftOffset - pichSpeed*PitchBreakMultiFactor - YawOffset.
     set BRHAngle to BottomFlapAngle + rightOffset - pichSpeed*PitchBreakMultiFactor + YawOffset.
 
@@ -335,6 +387,8 @@ function SetFlaps{
     }else{
         set TargetForAngle to TargetForAngle+0.5.
     }
+    
+    // set TargetForAngle to TargetForAngle + cc.
 }.
 
 
@@ -342,10 +396,8 @@ function SetFlaps{
 function printComp{
     clearscreen.
     print "---isTest--          |" +  isTest.
-    print "----------------------------------------".
     print "myStage:             |" + myStage.
     print "ship:VERTICALSPEED   |" + ship:VERTICALSPEED.
-    print "----------------------------------------".
     print "ForeAngle            |" + ForeAngle.    
     print "TopAngle             |" + TopAngle. 
     print "StarAngle            |" + StarAngle.
@@ -374,6 +426,17 @@ function printComp{
     print "ForeAngleToVel       |" + ForeAngleToVel.
     print "TargetForAngle       |" + TargetForAngle.
     print "th                   |" + th.
+    print "-----------------------------------------".
+    print "LAT                  |" + SHIP:GEOPOSITION:LAT.
+    print "latDiff              |" + latDiff.
+    print "latSpeed             |" + latSpeed.
+    print "cc                   |" + cc.
+    print "-----------------------------------------".
+    print "LNG                  |" + SHIP:GEOPOSITION:LNG.
+    print "lngDiff              |" + lngDiff.
+    print "lngSpeed             |" + lngSpeed.
+    print "myRoll               |" + myRoll.
+
 
     
     wait 0.05. 
