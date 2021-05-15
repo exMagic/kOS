@@ -1,4 +1,4 @@
-global isTest is false.
+global isDryTest is false.
 local targetAltitude is 10000.
 global stableSeconds is 0.
 
@@ -11,23 +11,23 @@ global ForeAngleToVel is 0.
 // global PadLNG is -74.55765.
 global padLAT is -0.09721.
 global PadLNG is -74.55766 - 0.001.
-global latDiff is 0.
-global lngDiff is 0.
+global LATDiff is 0.
+global LNGDiff is 0.
 
-global myRoll is 0.
-global cc is 0.
+global RollNavCorrection is 0.
+global PichNavCorrection is 0.
 
 global RollDiff is 0.
 global YawDiff is 0.
 
 global pichSpeed is 0.
-global rollSpeed is 0.
-global yawSpeed is 0.
-global latSpeed is 0.
-global lngSpeed is 0.
+global RollSpeed is 0.
+global YawSpeed is 0.
+global LATSpeed is 0.
+global LNGSpeed is 0.
 
-global rightOffset is 0.
-global leftOffset is 0.
+global RightOffset is 0.
+global LeftOffset is 0.
 global YawOffset is 0.
 
 global previousPitch is 0.
@@ -36,10 +36,10 @@ global previousYaw is 0.
 global previousLat is 0.
 global previousLng is 0.
 
-global TLHAngle is 0.
-global TRHAngle is 0.
-global BLHAngle is 0.
-global BRHAngle is 0.
+global TLFAngle is 0.
+global TRFAngle is 0.
+global BLFAngle is 0.
+global BRFAngle is 0.
 
 
 global TopFlapAngle is 0. 
@@ -51,22 +51,20 @@ global TopFlapAngleDefoult is 135.
 global BottomFlapAngleDefoult is 135.
 global TargetForAngle is 90.
 
-global myStage is 0.
+global StageNo is 0.
+
 global lastCount is 0.
 global lastCount2 is 0.
-global lastCount3 is 0.
-global lastCount4 is 0.
-global lastCount5 is 0.
 
 global th is 0.
-global TouchAltitude is 20.
+
 
 SET vess to SHIP.
 global partlist is vess:PARTSNAMED("hinge.04").
 
-until isTest = false{
+until isDryTest = false{
     RCS ON.
-    SetOrient().
+    GetTelemetry().
     DrawVec().
     SetFlaps().  
     printComp(). 
@@ -76,14 +74,14 @@ until false {
 
     stage.
 
-    until myStage=1{
+    until StageNo=1{
         //climb
-        SetOrient().
+        GetTelemetry().
         DrawVec().
         printComp().  
         local x is 100.  
         
-        LOCK STEERING TO Up + R((-latDiff*100)+2,-lngDiff*500,180).
+        LOCK STEERING TO Up + R((-LATDiff*100)+2,-LNGDiff*500,180).
         set th to 0.
         if (ship:altitude<targetAltitude/4){
             set th to 0.7.
@@ -101,14 +99,14 @@ until false {
                        
             set stableSeconds to stableSeconds + 1.
             if stableSeconds>5{
-                set myStage to myStage + 1.
+                set StageNo to StageNo + 1.
             }
         }           
     }
 
-    until myStage=2{ 
+    until StageNo=2{ 
         //flip to north  
-        SetOrient().
+        GetTelemetry().
         DrawVec().   
         printComp(). 
         SetFlaps().
@@ -116,29 +114,29 @@ until false {
         LOCK STEERING TO Up + R(-45,0,180).
         if (SHIP:FACING:PITCH<320 and SHIP:FACING:PITCH>180){
             lock throttle to 0.
-            set myStage to myStage + 1.
+            set StageNo to StageNo + 1.
         }else{
             lock throttle to 0.2.
         } 
     }
 
-    until myStage=3{
+    until StageNo=3{
         //desent
-        SetOrient().
         
         DrawVec().
         printComp().    
+        GetTelemetry().
         SetFlaps().
         UNLOCK STEERING.
         if ship:altitude<680{
-            set myStage to myStage + 1.
+            set StageNo to StageNo + 1.
         }
     }
 
-    until myStage=4{
-        SetOrient().
+    until StageNo=4{
         DrawVec().
         printComp().    
+        GetTelemetry().
         //FLIP to up
         LOCK STEERING TO Up + R(0,0,180).
     
@@ -149,14 +147,14 @@ until false {
         partlist[0]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top left
 
         if ForeAngle<20{
-            set myStage to myStage + 1.
+            set StageNo to StageNo + 1.
         }
     }
 
-    until myStage=5{
-        SetOrient().
+    until StageNo=5{
         DrawVec().
         printComp().    
+        GetTelemetry().
         //LAND
         LOCK STEERING TO SRFRETROGRADE.
         partlist[1]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top right
@@ -197,20 +195,35 @@ function GetForeAngleToVel{
     return VANG(ship:facing:forevector,SHIP:VELOCITY:SURFACE).
 }
 
-function SetOrient{
-    set latDiff to padLAT - SHIP:GEOPOSITION:LAT.
-    set lngDiff to PadLNG - SHIP:GEOPOSITION:LNG.
+function GetTelemetry{
+    set LATDiff to padLAT - SHIP:GEOPOSITION:LAT.
+    set LNGDiff to PadLNG - SHIP:GEOPOSITION:LNG.
 
-        if (time:seconds-lastCount4>0.1){
-        set lastCount4 to  time:seconds.
+    if (time:seconds-lastCount>0.1){
+        set lastCount to  time:seconds.
 
+        // LATSpeed
         set newLat to SHIP:GEOPOSITION:LAT.
-        set latSpeed to (previousLat - newLat).
+        set LATSpeed to (previousLat - newLat).
         set previousLat to newLat.  
-
+        
+        // LNGSpeed
         set newLng to SHIP:GEOPOSITION:LNG.
-        set lngSpeed to (previousLng - newLng).
-        set previousLng to newLng.               
+        set LNGSpeed to (previousLng - newLng).
+        set previousLng to newLng.  
+
+        // PICH SPEED
+        set newPitch to ForeAngle.
+        set pichSpeed to (previousPitch - newPitch) * -1.
+        set previousPitch to newPitch.  
+        // ROLL SPEED
+        set newRoll to StarAngle.
+        set RollSpeed to (previousRoll - newRoll) * -1.
+        set previousRoll to newRoll.  
+        // YAW SPEED        
+        set newYaw to StarNorthAngle.
+        set YawSpeed to (previousYaw - newYaw) * -1.
+        set previousYaw to newYaw.                             
     }
 
     set ForeAngle to GetForeAngleToUP().
@@ -221,23 +234,27 @@ function SetOrient{
 }
 
 function SetFlaps{
+    // if (time:seconds-lastCount2>0.1){
+    //     set lastCount2 to  time:seconds.
 
-    
-    
-
+    //     // PICH SPEED
+    //     set newPitch to ForeAngle.
+    //     set pichSpeed to (previousPitch - newPitch) * -1.
+    //     set previousPitch to newPitch.  
+    //     // ROLL SPEED
+    //     set newRoll to StarAngle.
+    //     set RollSpeed to (previousRoll - newRoll) * -1.
+    //     set previousRoll to newRoll.  
+    //     // YAW SPEED        
+    //     set newYaw to StarNorthAngle.
+    //     set YawSpeed to (previousYaw - newYaw) * -1.
+    //     set previousYaw to newYaw.                             
+    // }
+    /////////////////////////////////////////////////////
+    // -- PICH
     local PitchReactionMultiFactor is 1.
     local PitchBreakMultiFactor is 20.
-    local RollBreakMultiFactor is 10.
     
-    ////////////////////////////////////////// PICH
-    /////// PICH SPEED
-    if (time:seconds-lastCount>0.1){
-        set lastCount to  time:seconds.
-        set newPitch to ForeAngle.
-        set pichSpeed to (previousPitch - newPitch) * -1.
-        set previousPitch to newPitch.                
-    }
-    //////////// CALCULATE PICH
     set TopFlapAngle to TopFlapAngleDefoult + (ForeAngle-TargetForAngle)* PitchReactionMultiFactor.
     set BottomFlapAngle to BottomFlapAngleDefoult - (ForeAngle-TargetForAngle)* PitchReactionMultiFactor.
     
@@ -253,193 +270,153 @@ function SetFlaps{
     if (BottomFlapAngle<MinFlapAngle){
         set BottomFlapAngle to MinFlapAngle.
     }
-    
-
-
-
-
-    ///////////////////////////////////////////// ROLL
-    local RollReactionMultiFactor is 0.5.
-    local RollBreakMultiFactor is 1.2.
-    /////////// ROLL SPEED
-    if (time:seconds-lastCount2>0.1){
-        set lastCount2 to  time:seconds.
-        set newRoll to StarAngle.
-        set rollSpeed to (previousRoll - newRoll) * -1.
-        set previousRoll to newRoll.                
+    // -- PichNavCorrection
+    local max is 11.
+    local LATOffset is 0.00445. // Requaire offset of LAT for flipp from horizontal to vertical
+    set PichNavCorrection to (LATDiff + LATOffset) * 3000.
+        if (PichNavCorrection>max){
+            set PichNavCorrection to max.
+        }
+        if (PichNavCorrection <-max){
+            set PichNavCorrection to -max.
     }
-    /////////// CALCULATE ROLL
+    
+    /////////////////////////////////////////////////////
+    // -- ROLL
+    local RollReactionMultiFactor is 0.5.
+    local RollBreakMultiFactor is 1.0.    
 
-    if(TopAngle<90){//roof is on top
+    if(TopAngle<90){//roof points to up
         set RollDiff to StarAngle - 90 .
     }else{
-        if(StarAngle>90){
-            set RollDiff to TopAngle .
+        if(StarAngle>90){//roof poitns to ground
+            set RollDiff to TopAngle.
         }else{
-            set RollDiff to TopAngle * -1 .
+            set RollDiff to TopAngle * -1.
         }
     }
-
-    set myRoll to lngDiff * 5000 + (lngSpeed/10).
-    if (myRoll >11){
-        set myRoll to 11.
+    // RollNavCorrection
+    set RollNavCorrection to LNGDiff * 5000 + (LNGSpeed/10).
+    if (RollNavCorrection >11){
+        set RollNavCorrection to 11.
     }
-    set RollDiff to RollDiff + myRoll.
+    set RollDiff to RollDiff + RollNavCorrection.
 
     if (RollDiff<0){//lean to left
-        set rightOffset to RollDiff * RollReactionMultiFactor + rollSpeed * RollBreakMultiFactor.
-        set leftOffset to 0.
+        set RightOffset to RollDiff * RollReactionMultiFactor + RollSpeed * RollBreakMultiFactor.
+        set LeftOffset to 0.
     }else{//lean to right
-        set leftOffset to RollDiff * -1 * RollReactionMultiFactor - rollSpeed * RollBreakMultiFactor.
-        set rightOffset to 0.
+        set LeftOffset to RollDiff * -1 * RollReactionMultiFactor - RollSpeed * RollBreakMultiFactor.
+        set RightOffset to 0.
     }
 
-
-
-
-
-    //////////////////////////////////////////// YAW
+    /////////////////////////////////////////////////////
+    // -- YAW
     local YawReactionMultiFactor is 0.3.
     local YawBreakMultiFactor is 0.3.
-    /////////// YAW SPEED
-    if (time:seconds-lastCount3>0.1){
-        set lastCount3 to  time:seconds.
-        set newYaw to StarNorthAngle.
-        set yawSpeed to (previousYaw - newYaw) * -1.
-        set previousYaw to newYaw.                
-    }
-    /////////// CALCULATE YAW
 
-    if(VANG(ship:facing:forevector,NORTH:vector)<90){//star point to east
+    if(VANG(ship:facing:forevector,NORTH:vector)<90){//star vector points to east
         set YawDiff to StarNorthAngle - 90.
-    }else{//star point to west
+    }else{//star vector points to west
         if(StarNorthAngle>90){
             set YawDiff to VANG(ship:facing:forevector,NORTH:vector).
         }else{
             set YawDiff to VANG(ship:facing:forevector,NORTH:vector) * -1.
         }
     }
+    set YawOffset to YawDiff * YawReactionMultiFactor + YawSpeed*YawBreakMultiFactor + YawSpeed.
 
-    set YawOffset to YawDiff * YawReactionMultiFactor + yawSpeed*YawBreakMultiFactor + yawSpeed.
+    
 
-
-    //////////////////////////////////////////// NAVIGATION
-    ////////////////  SPEED
-
-    ////////////////  LNG SPEED
-
-
-
+    ///////////////////////////////////////////////////
     ///////////////////////////////////////// SET FLAPS
-    local max is 11.
-    set cc to (latDiff+0.00445)*3000.
-        if (cc>max){
-            set cc to max.
-        }
-        if (cc <-max){
-            set cc to -max.
+    ///////////////////////////////////////////////////
+
+
+    set TLFAngle to TopFlapAngle + PichNavCorrection + LeftOffset + pichSpeed * PitchBreakMultiFactor + YawOffset.
+    set TRFAngle to TopFlapAngle + PichNavCorrection + RightOffset + pichSpeed * PitchBreakMultiFactor - YawOffset.
+    set BLFAngle to BottomFlapAngle + LeftOffset - pichSpeed * PitchBreakMultiFactor - YawOffset.
+    set BRFAngle to BottomFlapAngle + RightOffset - pichSpeed * PitchBreakMultiFactor + YawOffset.
+
+    //Limit flaps angle
+    if (TLFAngle>MaxFlapAngle){
+        set TLFAngle to MaxFlapAngle.
+    }else if (TLFAngle<MinFlapAngle){
+        set TLFAngle to MinFlapAngle.
+    }
+    if (TRFAngle>MaxFlapAngle){
+        set TRFAngle to MaxFlapAngle.
+    }else if (TRFAngle<MinFlapAngle){
+        set TRFAngle to MinFlapAngle.
+    }
+    if (BLFAngle>MaxFlapAngle){
+        set BLFAngle to MaxFlapAngle.
+    }else if (BLFAngle<MinFlapAngle){
+        set BLFAngle to MinFlapAngle.
+    }
+    if (BRFAngle>MaxFlapAngle){
+        set BRFAngle to MaxFlapAngle.
+    }else if (BRFAngle<MinFlapAngle){
+        set BRFAngle to MinFlapAngle.
     }
 
-    set TLHAngle to TopFlapAngle+cc + leftOffset + pichSpeed*PitchBreakMultiFactor + YawOffset.
-    set TRHAngle to TopFlapAngle+cc + rightOffset + pichSpeed*PitchBreakMultiFactor - YawOffset.
-    set BLHAngle to BottomFlapAngle + leftOffset - pichSpeed*PitchBreakMultiFactor - YawOffset.
-    set BRHAngle to BottomFlapAngle + rightOffset - pichSpeed*PitchBreakMultiFactor + YawOffset.
+    partlist[1]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", TRFAngle).//top right
+    partlist[0]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", TLFAngle).//top left
 
-    if (TLHAngle>MaxFlapAngle){
-        set TLHAngle to MaxFlapAngle.
-    }else if (TLHAngle<MinFlapAngle){
-        set TLHAngle to MinFlapAngle.
-    }
+    partlist[2]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", BRFAngle).//bootom right
+    partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", BLFAngle).//bottom left
 
-    if (TRHAngle>MaxFlapAngle){
-        set TRHAngle to MaxFlapAngle.
-    }else if (TRHAngle<MinFlapAngle){
-        set TRHAngle to MinFlapAngle.
-    }
-
-    if (BLHAngle>MaxFlapAngle){
-        set BLHAngle to MaxFlapAngle.
-    }else if (BLHAngle<MinFlapAngle){
-        set BLHAngle to MinFlapAngle.
-    }
-
-    if (BRHAngle>MaxFlapAngle){
-        set BRHAngle to MaxFlapAngle.
-    }else if (BRHAngle<MinFlapAngle){
-        set BRHAngle to MinFlapAngle.
-    }
-
-    partlist[1]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", TRHAngle).//top right
-    partlist[0]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", TLHAngle).//top left
-
-    partlist[2]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", BRHAngle).//bootom right
-    partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", BLHAngle).//bottom left
-
-    if (pichSpeed<0.5 and pichSpeed >-0.5 and ForeAngle<TargetForAngle+2 and ForeAngle>TargetForAngle-2){
-        if((TRHAngle + TLHAngle)/2>TopFlapAngleDefoult){
-            set TopFlapAngleDefoult to TopFlapAngleDefoult +1.
-        }else{
-            set TopFlapAngleDefoult to TopFlapAngleDefoult -1.
-        }
-    }
-
+    // Adjust TargetForAngle to keep velocity vector close to vertical as posible.
     if (ForeAngleToVel < 90){
         set TargetForAngle to TargetForAngle-0.5.
     }else{
         set TargetForAngle to TargetForAngle+0.5.
-    }
-    
-    // set TargetForAngle to TargetForAngle + cc.
+    } 
 }.
 
 
 
 function printComp{
     clearscreen.
-    print "---isTest--          |" +  isTest.
-    print "myStage:             |" + myStage.
+    print "isDryTest            |" + isDryTest.
+    print "StageNo:             |" + StageNo.
     print "ship:VERTICALSPEED   |" + ship:VERTICALSPEED.
     print "ForeAngle            |" + ForeAngle.    
     print "TopAngle             |" + TopAngle. 
     print "StarAngle            |" + StarAngle.
     print "StarNorthAngle       |" + StarNorthAngle.
-    print "----------------------------------------".
     print "----------------PICH--------------------".
     print "TopFlapAngle         |" + TopFlapAngle.    
     print "BottomFlapAngle      |" + BottomFlapAngle.    
     print "pichSpeed            |" + pichSpeed.
-    print "TopFlapAngleDefoult  |" + TopFlapAngleDefoult.
-    print "----------------ROLL--------------------".
-    print "RollDiff             |" + RollDiff.
-    print "rollSpeed            |" + rollSpeed.
-    print "rightOffset          |" + rightOffset.
-    print "leftOffset           |" + leftOffset.
-    print "----------------YAW---------------------".
-    print "YawDiff              |" + YawDiff.
-    print "yawSpeed             |" + yawSpeed.
-    print "YawOffset            |" + YawOffset.
-    print "---------------FLAPS--------------------".
-    print "TLHAngle             |" + TLHAngle.
-    print "TRHAngle             |" + TRHAngle.
-    print "BLHAngle             |" + BLHAngle.
-    print "BRHAngle             |" + BRHAngle.
-    print "-----------------------------------------".
     print "ForeAngleToVel       |" + ForeAngleToVel.
     print "TargetForAngle       |" + TargetForAngle.
-    print "th                   |" + th.
-    print "-----------------------------------------".
+    print "----------------ROLL--------------------".
+    print "RollDiff             |" + RollDiff.
+    print "RollSpeed            |" + RollSpeed.
+    print "RightOffset          |" + RightOffset.
+    print "LeftOffset           |" + LeftOffset.
+    print "----------------YAW---------------------".
+    print "YawDiff              |" + YawDiff.
+    print "YawSpeed             |" + YawSpeed.
+    print "YawOffset            |" + YawOffset.
+    print "---------NAVIGATION---------------------".
+    print "-----------------LAT--------------------".
     print "LAT                  |" + SHIP:GEOPOSITION:LAT.
-    print "latDiff              |" + latDiff.
-    print "latSpeed             |" + latSpeed.
-    print "cc                   |" + cc.
-    print "-----------------------------------------".
+    print "LATDiff              |" + LATDiff.
+    print "LATSpeed             |" + LATSpeed.
+    print "PichNavCorrection    |" + PichNavCorrection.
+    print "-----------------LNG--------------------".
     print "LNG                  |" + SHIP:GEOPOSITION:LNG.
-    print "lngDiff              |" + lngDiff.
-    print "lngSpeed             |" + lngSpeed.
-    print "myRoll               |" + myRoll.
-
-
-    
+    print "LNGDiff              |" + LNGDiff.
+    print "LNGSpeed             |" + LNGSpeed.
+    print "RollNavCorrection    |" + RollNavCorrection.
+    print "----------------------------------------".
+    print "-------------FLAPS----------------------".
+    print "TLHAngle             |" + TLFAngle.
+    print "TRHAngle             |" + TRFAngle.
+    print "BLHAngle             |" + BLFAngle.
+    print "BRHAngle             |" + BRFAngle.    
     wait 0.05. 
 }.
 
@@ -449,7 +426,7 @@ function DrawVec{
       V(0,0,0),
       SHIP:FACING:vector,
       RGB(1,0,0),
-      "See the arrow?",
+      "",
       20.0,
       TRUE,
       0.005,
@@ -461,7 +438,7 @@ function DrawVec{
       V(0,0,0),
       SHIP:UP:vector,
       RGB(0,1,0),
-      "See the arrow?",
+      "",
       20.0,
       TRUE,
       0.005,
@@ -473,7 +450,7 @@ function DrawVec{
       V(0,0,0),
       SHIP:VELOCITY:SURFACE,
       RGB(0,0,1),
-      "VELOCITY",
+      "",
       1.0,
       TRUE,
       0.5,
@@ -484,8 +461,8 @@ function DrawVec{
     SET anArrow4 TO VECDRAW(
       V(0,0,0),
       SHIP:FACING:UPVECTOR,
-      RGB(0,0.5,0.5),
-      "UP",
+      RGB(1,0.5,0.5),
+      "",
       20.0,
       TRUE,
       0.005,
@@ -496,8 +473,8 @@ function DrawVec{
     SET anArrow5 TO VECDRAW(
       V(0,0,0),
       SHIP:FACING:STARVECTOR,
-      RGB(0,1,0.5),
-      "UP",
+      RGB(0,1,1),
+      "",
       20.0,
       TRUE,
       0.005,
@@ -506,4 +483,3 @@ function DrawVec{
     ).
 }.
 
-SET SHIP:CONTROL:NEUTRALIZE to TRUE.
