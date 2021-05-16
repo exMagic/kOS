@@ -165,7 +165,7 @@ until false {
         partlist[2]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bootom right
         partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bottom left
         }
-        if ship:altitude < 100{
+        if ship:altitude < 105{
             set th to th + (-ship:VERTICALSPEED/15).
             LOCK STEERING TO Up + R(0,0,180).
         }
@@ -234,22 +234,7 @@ function GetTelemetry{
 }
 
 function SetFlaps{
-    // if (time:seconds-lastCount2>0.1){
-    //     set lastCount2 to  time:seconds.
 
-    //     // PICH SPEED
-    //     set newPitch to ForeAngle.
-    //     set pichSpeed to (previousPitch - newPitch) * -1.
-    //     set previousPitch to newPitch.  
-    //     // ROLL SPEED
-    //     set newRoll to StarAngle.
-    //     set RollSpeed to (previousRoll - newRoll) * -1.
-    //     set previousRoll to newRoll.  
-    //     // YAW SPEED        
-    //     set newYaw to StarNorthAngle.
-    //     set YawSpeed to (previousYaw - newYaw) * -1.
-    //     set previousYaw to newYaw.                             
-    // }
     /////////////////////////////////////////////////////
     // -- PICH
     local PitchReactionMultiFactor is 1.
@@ -272,7 +257,7 @@ function SetFlaps{
     }
     // -- PichNavCorrection
     local max is 11.
-    local LATOffset is 0.00445. // Requaire offset of LAT for flipp from horizontal to vertical
+    local LATOffset is 0.00452. // Requaire offset of LAT for flipp from horizontal to vertical
     set PichNavCorrection to (LATDiff + LATOffset) * 3000.
         if (PichNavCorrection>max){
             set PichNavCorrection to max.
