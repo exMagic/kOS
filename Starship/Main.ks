@@ -7,10 +7,9 @@ global StarAngle is 0.
 global TopAngle is 0.
 global StarNorthAngle is 0.
 global ForeAngleToVel is 0.
-// global padLAT is -0.097724.
-// global PadLNG is -74.55765.
+
 global padLAT is -0.09721.
-global PadLNG is -74.55766 - 0.001.
+global PadLNG is -74.55766.
 global LATDiff is 0.
 global LNGDiff is 0.
 
@@ -197,7 +196,7 @@ function GetForeAngleToVel{
 
 function GetTelemetry{
     set LATDiff to padLAT - SHIP:GEOPOSITION:LAT.
-    set LNGDiff to PadLNG - SHIP:GEOPOSITION:LNG.
+    set LNGDiff to PadLNG - 0.001 - SHIP:GEOPOSITION:LNG.
 
     if (time:seconds-lastCount>0.1){
         set lastCount to  time:seconds.
@@ -257,7 +256,7 @@ function SetFlaps{
     }
     // -- PichNavCorrection
     local max is 11.
-    local LATOffset is 0.00452. // Requaire offset of LAT for flipp from horizontal to vertical
+    local LATOffset is 0.00462. // Requaire offset of LAT for flipp from horizontal to vertical
     set PichNavCorrection to (LATDiff + LATOffset) * 3000.
         if (PichNavCorrection>max){
             set PichNavCorrection to max.
@@ -352,11 +351,13 @@ function SetFlaps{
     partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", BLFAngle).//bottom left
 
     // Adjust TargetForAngle to keep velocity vector close to vertical as posible.
-    if (ForeAngleToVel < 90){
-        set TargetForAngle to TargetForAngle-0.5.
-    }else{
-        set TargetForAngle to TargetForAngle+0.5.
-    } 
+    if(isDryTest = false){
+        if (ForeAngleToVel < 90){
+            set TargetForAngle to TargetForAngle-0.5.
+        }else{
+            set TargetForAngle to TargetForAngle+0.5.
+        } 
+    }
 }.
 
 
