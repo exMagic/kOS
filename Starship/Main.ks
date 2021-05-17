@@ -8,26 +8,26 @@ global TopAngle is 0.
 global StarNorthAngle is 0.
 global ForeAngleToVel is 0.
 
-global padLAT is -0.09721.
-global PadLNG is -74.55766.
-global LATDiff is 0.
-global LNGDiff is 0.
-
-global RollNavCorrection is 0.
-global PichNavCorrection is 0.
+global pichSpeed is 0.
 
 global RollDiff is 0.
-global YawDiff is 0.
-
-global pichSpeed is 0.
 global RollSpeed is 0.
-global YawSpeed is 0.
-global LATSpeed is 0.
-global LNGSpeed is 0.
-
 global RightOffset is 0.
 global LeftOffset is 0.
+
+global YawDiff is 0.
+global YawSpeed is 0.
 global YawOffset is 0.
+
+global padLAT is -0.09721.
+global PadLNG is -74.55766.
+global LATSpeed is 0.
+global LATDiff is 0.
+global PichNavCorrection is 0.
+
+global LNGSpeed is 0.
+global LNGDiff is 0.
+global RollNavCorrection is 0.
 
 global previousPitch is 0.
 global previousRoll is 0.
@@ -51,17 +51,13 @@ global BottomFlapAngleDefoult is 135.
 global TargetForAngle is 90.
 
 global StageNo is 0.
-
 global lastCount is 0.
-global lastCount2 is 0.
-
 global th is 0.
-
 
 SET vess to SHIP.
 global partlist is vess:PARTSNAMED("hinge.04").
 
-until isDryTest = false{
+until isDryTest = false{ // Set to TRUE if you want to run dry test on the ground.
     RCS ON.
     GetTelemetry().
     DrawVec().
@@ -69,113 +65,112 @@ until isDryTest = false{
     printComp(). 
 }
 
-until false {
+/////////////////////////////////////////////////////////////////////////////
+////////////////////////////////// STAGES ///////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-    stage.
+stage.
 
-    until StageNo=1{
-        //climb
-        GetTelemetry().
-        DrawVec().
-        printComp().  
-        local x is 100.  
-        
-        LOCK STEERING TO Up + R((-LATDiff*100)+2,-LNGDiff*500,180).
-        set th to 0.
-        if (ship:altitude<targetAltitude/4){
-            set th to 0.7.
-        }else{
-            set th to (targetAltitude - ship:altitude)/targetAltitude*0.15.
-        }
-        
-        if ship:VERTICALSPEED<0{
-            set th to th * ((ship:VERTICALSPEED * -1)*10).
-        }
-        
-        lock throttle to th.           
-
-        if ship:altitude> targetAltitude/2 and ship:VERTICALSPEED<5 and ship:VERTICALSPEED>-5{
-                       
-            set stableSeconds to stableSeconds + 1.
-            if stableSeconds>5{
-                set StageNo to StageNo + 1.
-            }
-        }           
-    }
-
-    until StageNo=2{ 
-        //flip to north  
-        GetTelemetry().
-        DrawVec().   
-        printComp(). 
-        SetFlaps().
-        
-        LOCK STEERING TO Up + R(-45,0,180).
-        if (SHIP:FACING:PITCH<320 and SHIP:FACING:PITCH>180){
-            lock throttle to 0.
-            set StageNo to StageNo + 1.
-        }else{
-            lock throttle to 0.2.
-        } 
-    }
-
-    until StageNo=3{
-        //desent
-        
-        DrawVec().
-        printComp().    
-        GetTelemetry().
-        SetFlaps().
-        UNLOCK STEERING.
-        if ship:altitude<680{
-            set StageNo to StageNo + 1.
-        }
-    }
-
-    until StageNo=4{
-        DrawVec().
-        printComp().    
-        GetTelemetry().
-        //FLIP to up
-        LOCK STEERING TO Up + R(0,0,180).
+until StageNo=1{
+    // Ascent
+    GetTelemetry().
+    DrawVec().
+    printComp().  
     
-        partlist[2]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bootom right
-        partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bottom left
+    LOCK STEERING TO Up + R((-LATDiff*100)+2,-LNGDiff*500,180).
+    set th to 0.
+    if (ship:altitude<targetAltitude/4){
+        set th to 0.7.
+    }else{
+        set th to (targetAltitude - ship:altitude)/targetAltitude*0.15.
+    }
+    
+    if ship:VERTICALSPEED<0{
+        set th to th * ((ship:VERTICALSPEED * -1)*10).
+    }
+    
+    lock throttle to th.           
 
-        partlist[1]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top right
-        partlist[0]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top left
-
-        if ForeAngle<20{
+    if ship:altitude> targetAltitude/2 and ship:VERTICALSPEED<5 and ship:VERTICALSPEED>-5{
+                    
+        set stableSeconds to stableSeconds + 1.
+        if stableSeconds>5{
             set StageNo to StageNo + 1.
         }
-    }
+    }           
+}
 
-    until StageNo=5{
-        DrawVec().
-        printComp().    
-        GetTelemetry().
-        //LAND
-        LOCK STEERING TO SRFRETROGRADE.
-        partlist[1]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top right
-        partlist[0]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top left
-        set th to 1 / (  100 /  -ship:VERTICALSPEED).
-        if ship:altitude < 200{
-            GEAR ON.
-        partlist[2]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bootom right
-        partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bottom left
-        }
-        if ship:altitude < 105{
-            set th to th + (-ship:VERTICALSPEED/15).
-            LOCK STEERING TO Up + R(0,0,180).
-        }
+until StageNo=2{ 
+    // Flip to north  
+    GetTelemetry().
+    DrawVec().   
+    printComp(). 
+    SetFlaps().
+    
+    LOCK STEERING TO Up + R(-45,0,180).
+    if (SHIP:FACING:PITCH<320 and SHIP:FACING:PITCH>180){
+        lock throttle to 0.
+        set StageNo to StageNo + 1.
+    }else{
+        lock throttle to 0.2.
+    } 
+}
 
-        LOCK throttle to th.
+until StageNo=3{
+    // Descent    
+    DrawVec().
+    printComp().    
+    GetTelemetry().
+    SetFlaps().
+    UNLOCK STEERING.
+    if ship:altitude<680{
+        set StageNo to StageNo + 1.
     }
 }
 
+until StageNo=4{
+    // Fip to up
+    DrawVec().
+    printComp().    
+    GetTelemetry().
+    LOCK STEERING TO Up + R(0,0,180).
+
+    partlist[2]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bootom right
+    partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bottom left
+
+    partlist[1]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top right
+    partlist[0]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top left
+
+    if ForeAngle<20{
+        set StageNo to StageNo + 1.
+    }
+}
+
+until StageNo=5{
+    // Land
+    DrawVec().
+    printComp().    
+    GetTelemetry().
+    LOCK STEERING TO SRFRETROGRADE.
+    partlist[1]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top right
+    partlist[0]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top left
+    set th to 1 / (  100 /  -ship:VERTICALSPEED).
+    if ship:altitude < 200{
+        GEAR ON.
+    partlist[2]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bootom right
+    partlist[3]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bottom left
+    }
+    if ship:altitude < 105{
+        set th to th + (-ship:VERTICALSPEED/15).
+        LOCK STEERING TO Up + R(0,0,180).
+    }
+    LOCK throttle to th.
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////
-///////////////////////////////MY FUNCTIONS//////////////////////////////////
+/////////////////////////////// MY FUNCTIONS ////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
 function GetTopAngleToUP{
@@ -399,10 +394,10 @@ function printComp{
     print "RollNavCorrection    |" + RollNavCorrection.
     print "----------------------------------------".
     print "-------------FLAPS----------------------".
-    print "TLHAngle             |" + TLFAngle.
-    print "TRHAngle             |" + TRFAngle.
-    print "BLHAngle             |" + BLFAngle.
-    print "BRHAngle             |" + BRFAngle.    
+    print "TLFAngle             |" + TLFAngle.
+    print "TRFAngle             |" + TRFAngle.
+    print "BLFAngle             |" + BLFAngle.
+    print "BRFAngle             |" + BRFAngle.    
     wait 0.05. 
 }.
 
