@@ -1,3 +1,4 @@
+## HOW TO USE
 - make sure you have instaled kOS mod. easiest way is by using CKAN - https://github.com/KSP-CKAN/CKAN/releases
 - move a "boot.ks" file to the "YourGameRootFolder\Ships\Script\boot" folder.
 - move a "Main.ks" file to the "YourGameRootFolder\Ships\Script\boot\kOS\Starship" folder.
