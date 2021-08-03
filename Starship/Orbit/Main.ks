@@ -6,6 +6,12 @@ global myYAW is 0.
 global AngVelToNorth is 0.
 global AngPadToNorth is 0.
 
+global _Pich is 0.
+global AngVelToUp is 0.
+global AngPadToUp is 0.
+global frt is 0.
+global frt0 is 0.
+
 global logfile is "Log" + RANDOM() + ".csv".
 
 global _is is 0.
@@ -264,6 +270,8 @@ until isDryTest = false{ // Set to TRUE if you want to run dry test on the groun
 /////////////////////////////////////////////////////////////////////////////
 
 //stage.
+
+
 partlist[BRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//bootom right
 partlist[BLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//bottom left
 partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top right
@@ -422,7 +430,7 @@ function GetForeAngleToVel{
     if (_is<mylist:length){
         set _lng to mylist[_is].
         set _alt to mylist[_is+1].        
-        if(SHIP:GEOPOSITION:LNG>_lng){
+        if(SHIP:GEOPOSITION:LNG+0.12>_lng){
             set _is to _is+2.
             set AltError to  SHIP:ALTITUDE - _alt.
         }
@@ -449,17 +457,7 @@ function GetForeAngleToVel{
 
 function GetTelemetry{
 
-    if (ship:altitude<70000){
-        if (time:seconds-lastCount2>4){
-            set lastCount2 to  time:seconds.
-            LOG SHIP:GEOPOSITION:LNG + ", " + ship:altitude + ", " to logfile.
-        }
-        SetAltError().
-        derr().
-    }
-
-
-
+    
 
    
 
@@ -474,6 +472,10 @@ function GetTelemetry{
     set LATDiff to padLAT - SHIP:GEOPOSITION:LAT.
     set LNGDiff to PadLNG - 0.001 - SHIP:GEOPOSITION:LNG.
     set TargetVector to SHIP:UP:vector + R(0,(VANG(SHIP:VELOCITY:surface, SHIP:up:vector)-70) * -1,0).
+
+
+    
+
 
     if (time:seconds-lastCount>0.1){
         set lastCount to  time:seconds.
@@ -512,6 +514,32 @@ function GetTelemetry{
     
     set StarNorthAngle to GetStarAngleToNORTH().
     set ForeAngleToVel to GetForeAngleToVel().
+
+
+    if (ship:altitude<70000){
+        // if (time:seconds-lastCount2>4){
+        //     set lastCount2 to  time:seconds.
+        //     LOG SHIP:GEOPOSITION:LNG + ", " + ship:altitude + ", " to logfile.
+        // }
+        SetAltError().
+        //derr().
+    }
+
+
+    set AngVelToNorth to VANG(SHIP:VELOCITY:surface,ship:north:vector).
+
+    if (LATDiff<0){
+        set AngPadToNorth to 90 + (45 * (abs(LATDiff)/abs(LNGDiff))).
+    }else{
+        set AngPadToNorth to 90 - (45 * (abs(LATDiff)/abs(LNGDiff))).
+    }
+
+    set AngVelToUp to VANG(SHIP:VELOCITY:surface, SHIP:up:vector).
+    set frt0 to 3769911/360 * abs(LNGDiff).
+    set frt to  ARCTAN2(ship:altitude,frt0).
+    set AngPadToUp to 90 + frt.
+    set _Pich to AngPadToUp - AngVelToUp.
+
 }
 function SetFlapsVac{
 
@@ -520,16 +548,25 @@ function SetFlapsVac{
     local PitchReactionMultiFactor is 0.5.
     local PitchBreakMultiFactor is 4.
     
-    set AltError2 to AltError/15.
-    if (AltError2>20){
-        set AltError2 to 20.
+    local limit is 30.
+    set AltError2 to MAX(MIN(AltError/15,limit),-limit).        
+    
+    local ss is 0.
+    if (SHIP:altitude<15000){    
+        set AltError2 to 0.
     }
-    if (AltError2<-20){
-        set AltError2 to -20.
+    if (SHIP:altitude<10000){    
+        set ss to _Pich/2.
     }
+    // if (AltError2>20){
+    //     set AltError2 to 20.
+    // }
+    // if (AltError2<-20){
+    //     set AltError2 to -20.
+    // }
 
-    set TopFlapAngle to TopFlapAngleDefoult - (ForeToVelAngle-(TargetForAngle + AltError2))* PitchReactionMultiFactor.
-    set BottomFlapAngle to BottomFlapAngleDefoult + (ForeToVelAngle-(TargetForAngle + AltError2))* PitchReactionMultiFactor.
+    set TopFlapAngle to TopFlapAngleDefoult - (ForeToVelAngle-(TargetForAngle + AltError2 + ss))* PitchReactionMultiFactor.
+    set BottomFlapAngle to BottomFlapAngleDefoult + (ForeToVelAngle-(TargetForAngle + AltError2 + ss))* PitchReactionMultiFactor.
     
     if (TopFlapAngle>MaxFlapAngle){
         set TopFlapAngle to MaxFlapAngle.
@@ -584,15 +621,33 @@ function SetFlapsVac{
 
     /////////////////////////////////////////////////////
     // -- YAW
-    local YawReactionMultiFactor is 2.
-    local YawBreakMultiFactor is 4.
+    local YawReactionMultiFactor is 3.
+    local YawBreakMultiFactor is 8.
 
 
-    if (SHIP:altitude>15000){
+    if (SHIP:altitude>10000){
         set Va to VCRS(SHIP:VELOCITY:surface, SHIP:up:vector).
+
+        if (ship:GROUNDSPEED<1000){
+            if (ForeAngleToVel > 80){
+                set TargetForAngle to TargetForAngle-0.2.
+            }else{
+                set TargetForAngle to TargetForAngle+0.2.
+            } 
+        }
+
+
     }else{
         set Va to ship:north:vector.
+
+
+        // if (_Pich > 0){
+        //     set TargetForAngle to TargetForAngle - _Pich.
+        // }else{
+        //     set TargetForAngle to TargetForAngle + _Pich.
+        // }
     }
+    
     
     set Vb to VCRS(SHIP:up:vector,Va).
 
@@ -608,13 +663,16 @@ function SetFlapsVac{
             set YawDiff to 180 - (VANG(ship:facing:forevector,Va)-90).            
         }
     }
-    if (SHIP:altitude>15000){
-     //   set Va to VCRS(SHIP:VELOCITY:surface, SHIP:up:vector).
-        set YawDiff to YawDiff - (AngPadToNorth-90).
-        set myYAW to MIN((AngPadToNorth-AngVelToNorth)*80, 40).
-    }else{
-        set myYAW to 0.
-    }
+    
+    set myYAW to MIN((AngPadToNorth-AngVelToNorth)*80, 40).
+
+//     // if (SHIP:altitude<15000){
+//     if (SHIP:altitude>15000){
+//   set Va to VCRS(SHIP:VELOCITY:surface, SHIP:up:vector).
+//         set YawDiff to YawDiff - (AngPadToNorth-90).
+//     }else{
+//         set myYAW to 0.
+//     // // }
    
 
     set YawOffset to YawDiff * YawReactionMultiFactor + YawSpeed * YawBreakMultiFactor - myYAW.// + (d1-a1)/2.// + (LATDiff*10).
@@ -675,14 +733,10 @@ function SetFlapsVac{
     //         set TargetForAngle to TargetForAngle+0.5.
     //     } 
     // }
-    if (ship:GROUNDSPEED<1000){
-        if (ForeAngleToVel > 80){
-            set TargetForAngle to TargetForAngle-0.2.
-        }else{
-            set TargetForAngle to TargetForAngle+0.2.
-        } 
-    }
 
+    
+    
+    
     if (ship:GROUNDSPEED<800 and TopFlapAngleDefoult>125){       
             set TopFlapAngleDefoult to TopFlapAngleDefoult - 0.2.
             set BottomFlapAngleDefoult to BottomFlapAngleDefoult - 0.2.
@@ -696,6 +750,7 @@ function printComp{
     print "isDryTest            |" + isDryTest.
     print "StageNo:             |" + StageNo.
     print "ship:VERTICALSPEED   |" + ship:VERTICALSPEED.
+    print "ship:altitude        |" + ship:altitude.
     print "x                    |" + VANG(ship:facing:starvector,Vb).    
     print "x2                   |" + VANG(ship:facing:forevector,Va). 
     print "StarAngle            |" + StarAngle.
@@ -752,6 +807,13 @@ function printComp{
     print "myYAW                |" +     myYAW.
     print "AngVelToNorth        |" +     AngVelToNorth.
     print "AngPadToNorth        |" +     AngPadToNorth.
+    print "_Pich................|" +     _Pich.
+    print "AngPadToUp___________|" +     AngPadToUp.
+    print "AngVelToUp___________|" +     AngVelToUp.
+    print "frt .................|" +     frt.
+    print "frt0 ................|" +     frt0.
+
+     set _Pich to AngPadToUp - AngVelToUp.
 
 
 
