@@ -9,7 +9,7 @@ function step_Orbit {
 }
 
 function step_Deorbit_burn {
-    local targetPer is 37700.
+    local targetPer is 38500.
     GetTelemetry().
     printComp().  
     RCS ON.    
@@ -45,7 +45,7 @@ function step_Descent {
     GetTelemetry().
     UNLOCK STEERING.
     if ship:altitude<70000{
-        local xx is (VANG(SHIP:VELOCITY:SURFACE, SHIP:up:vector)-TargetForAngle) * -1.
+        local xx is (VANG(SHIP:VELOCITY:SURFACE, SHIP:up:vector)-TargetForAngle - TRError2) * -1.
         
         if ship:altitude>53000{
             RCS ON.         
@@ -57,11 +57,52 @@ function step_Descent {
         }
         SetFlapsVac().
 
-        if ship:altitude <1200{
+        if ship:altitude <850{
 	        SET step TO false. //kill step.
         }
     }
 }
+
+function step_Flip_to_up {
+    DrawVec().
+    printComp().    
+    GetTelemetry().
+    LOCK STEERING TO Up + R(0,0,180).
+
+    partlist[BRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bootom right
+    partlist[BLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bottom left
+
+    partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top right
+    partlist[TLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top left
+
+    if ForeAngle<60{
+	    SET step TO false. //kill step.
+    }
+}
+
+function step_Land {
+    DrawVec().
+    printComp().    
+    GetTelemetry().
+    LOCK STEERING TO SRFRETROGRADE.
+    partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top right
+    partlist[TLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top left
+    set th to 1 / (  50 /  -ship:VERTICALSPEED).
+    if alt:radar < 100{
+        GEAR ON.
+    partlist[BRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bootom right
+    partlist[BLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bottom left
+    }
+    if alt:radar < 65{
+        set th to th + (-ship:VERTICALSPEED/5).
+        LOCK STEERING TO Up + R(0,0,180).
+    }
+    LOCK throttle to th.
+}
+
+
+
+ 
 
     
     
