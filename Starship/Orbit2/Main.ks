@@ -4,6 +4,8 @@ RUNONCEPATH("0:/boot/kOS/Starship/Orbit2/functions.ks").
 RUNONCEPATH("0:/boot/kOS/Starship/Orbit2/steps.ks").
 
 global yml is 0.
+global lt is 0.
+global lg is 0.
 global myYAW is 0.
 global AngVelToNorth is 0.
 global AngPadToNorth is 0.
@@ -202,10 +204,10 @@ function SetFlapsVac{
         }
     }
     set myYAWLimit to SHIP:altitude - (SHIP:altitude/1.001) - 10.
-    set myYAWLimit to MAX(MIN(myYAWLimit,30),4).
+    set myYAWLimit to MAX(MIN(myYAWLimit,30),6).
 
     set myYAWMultifactor to SHIP:altitude - (SHIP:altitude/1.002) - 20.
-    set myYAWMultifactor to MAX(MIN(myYAWMultifactor,100),0.5).
+    set myYAWMultifactor to MAX(MIN(myYAWMultifactor,100),0.4).
 
 
     set myYAW to MAX(MIN((AngPadToNorth-AngVelToNorth)*myYAWMultifactor, myYAWLimit),-myYAWLimit).

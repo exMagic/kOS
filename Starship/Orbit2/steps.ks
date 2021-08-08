@@ -84,7 +84,12 @@ function step_Land {
     DrawVec().
     printComp().    
     GetTelemetry().
-    LOCK STEERING TO SRFRETROGRADE.
+
+    set xp to 1000.
+    set lt to (LATDiff*xp) * -1.
+    set lg to (LNGDiff*xp) * -1.
+
+    LOCK STEERING TO SRFRETROGRADE+ R(lt,lg,180).
     partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top right
     partlist[TLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top left
     set th to 1 / (  50 /  -ship:VERTICALSPEED).
@@ -102,7 +107,7 @@ function step_Land {
         LOCK STEERING TO Up + R(0,0,180).
     }
     LOCK throttle to th.
-    if alt:radar<21.5{
+    if alt:radar<22.5{
 	    SET step TO false. //kill step.
     }
 }
