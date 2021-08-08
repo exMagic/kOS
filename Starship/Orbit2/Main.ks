@@ -158,8 +158,9 @@ function SetFlapsVac{
     
     local limit is 30.
     set fr to 15.
-    if (SHIP:altitude<10000){
+    if (SHIP:altitude<15000){
         set fr to 5.
+        set limit to 20.
     }
     set TRError2 to MAX(MIN(TRError/fr,limit),-limit).        
     //set TRError2 to 0.      
@@ -200,13 +201,17 @@ function SetFlapsVac{
             set YawDiff to 180 - (VANG(ship:facing:forevector,Va)-90).            
         }
     }
-    set myYAWLimit to 40.
-    set myYAWMultifactor to 100.
-    if (SHIP:altitude<15000){
-        set myYAWLimit to 3.
-        set myYAWMultifactor to 0.5.
-    }
+    set myYAWLimit to SHIP:altitude - (SHIP:altitude/1.001) - 10.
+    set myYAWLimit to MAX(MIN(myYAWLimit,30),4).
+
+    set myYAWMultifactor to SHIP:altitude - (SHIP:altitude/1.002) - 20.
+    set myYAWMultifactor to MAX(MIN(myYAWMultifactor,100),0.5).
+
+
     set myYAW to MAX(MIN((AngPadToNorth-AngVelToNorth)*myYAWMultifactor, myYAWLimit),-myYAWLimit).
+    // if (SHIP:altitude>53000){
+    //     set myYAW to 0.
+    // }
     //set myYAW to 0.   
     set yError to YawDiff * YawReactionMultiFactor.
     set ySpeed to YawSpeed * YawBreakMultiFactor.
@@ -218,7 +223,7 @@ function SetFlapsVac{
     //     set yml to 3.
     // }
 
-    set yml to SHIP:altitude - (SHIP:altitude/1.0001) + 0.3.
+    set yml to SHIP:altitude - (SHIP:altitude/1.0001) -0.5.
     set yml to MAX(MIN(yml,3),0.4).
 
     set YawOffset to (yError + ySpeed - myYAW)*yml.

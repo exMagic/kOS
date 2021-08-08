@@ -71,9 +71,9 @@ function GetTelemetry{
     set AngVelToNorth to VANG(SHIP:VELOCITY:surface,ship:north:vector).
 
     if (LATDiff<0){
-        set AngPadToNorth to 90 + (45 * (abs(LATDiff)/abs(LNGDiff))).
+        set AngPadToNorth to 90 + (45 * (abs(LATDiff+0.001)/abs(LNGDiff))).
     }else{
-        set AngPadToNorth to 90 - (45 * (abs(LATDiff)/abs(LNGDiff))).
+        set AngPadToNorth to 90 - (45 * (abs(LATDiff+0.001)/abs(LNGDiff))).
     }
 
     set AngVelToUp to VANG(SHIP:VELOCITY:surface, SHIP:up:vector).
@@ -95,7 +95,7 @@ function SetTRError{
             set _lng to mylist[_is].
             set _alt to mylist[_is+1].            
             
-            if(SHIP:GEOPOSITION:LNG>_lng-0.12){
+            if(SHIP:GEOPOSITION:LNG>_lng-0.131){
                 set _is to _is+2.
                 set TRError to  SHIP:ALTITUDE - _alt.
                 set newTRError to TRError.
@@ -112,7 +112,7 @@ function SetTRError{
             
             if(ship:altitude<_alt2){
                 set Xs to Xs+2.
-                set TRError to  ((SHIP:GEOPOSITION:LNG - _lng2+0.12) * 6000).
+                set TRError to  ((SHIP:GEOPOSITION:LNG - _lng2+0.131) * 6000).
                 set newTRError to TRError.
                 set TRErrorSpeed to (previousTRError - newTRError) * -1.
                 set previousTRError to newTRError.
@@ -188,8 +188,8 @@ function printComp{
     print "_lng2                |" +     _lng2.
     print "_alt2                |" +     _alt2.
     print "TRErrorSpeed         |" +     TRErrorSpeed.
-    print "myYAW                |" +     myYAW.
     print "yml                  |" +     yml.
+    print "myYAW                |" +     myYAW.
     print "AngVelToNorth        |" +     AngVelToNorth.
     print "AngPadToNorth        |" +     AngPadToNorth.
     print "_Pich................|" +     _Pich.

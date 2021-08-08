@@ -49,7 +49,7 @@ function step_Descent {
         
         if ship:altitude>53000{
             RCS ON.         
-            LOCK STEERING TO Up + R(0,xx,VANG(SHIP:VELOCITY:surface, SHIP:north:vector)-180).
+            LOCK STEERING TO Up + R(myYAW,xx,VANG(SHIP:VELOCITY:surface, SHIP:north:vector)-180).
         }else{
             RCS off. 
 
@@ -57,7 +57,7 @@ function step_Descent {
         }
         SetFlapsVac().
 
-        if ship:altitude <850{
+        if ship:altitude <750{
 	        SET step TO false. //kill step.
         }
     }
@@ -97,7 +97,14 @@ function step_Land {
         set th to th + (-ship:VERTICALSPEED/5).
         LOCK STEERING TO Up + R(0,0,180).
     }
+    if alt:radar < 35{
+        set th to th + (-ship:VERTICALSPEED/8).
+        LOCK STEERING TO Up + R(0,0,180).
+    }
     LOCK throttle to th.
+    if alt:radar<21.5{
+	    SET step TO false. //kill step.
+    }
 }
 
 
