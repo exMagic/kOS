@@ -1,3 +1,5 @@
+
+
 function GetTelemetry{
 
     set GroundALT to ship:altitude-SHIP:GEOPOSITION:TERRAINHEIGHT.
@@ -14,10 +16,7 @@ function GetTelemetry{
             
         }
     }
-    if (ship:GROUNDSPEED<800 and TopFlapAngleDefoult>140){       
-        set TopFlapAngleDefoult to TopFlapAngleDefoult - 0.2.
-        set BottomFlapAngleDefoult to BottomFlapAngleDefoult - 0.2.
-    }
+
 
     if (time:seconds-lastCount>0.1){
         set lastCount to  time:seconds.
@@ -125,57 +124,44 @@ function SetTRError{
 
 function printComp{
     clearscreen.
-    //print "isDryTest            |" + isDryTest.
     print "step:                |" + step.
     print "ship:VERTICALSPEED   |" + ship:VERTICALSPEED.
     print "ship:altitude        |" + ship:altitude.
-    print "x                    |" + VANG(ship:facing:starvector,Vb).    
-    print "x2                   |" + VANG(ship:facing:forevector,Va). 
-    print "StarAngle            |" + StarAngle.
     print "DYNAMICPRESSURE      |" + Ship:DYNAMICPRESSURE.
     print "----------------PICH--------------------".
-    print "TopFlapAngle         |" + TopFlapAngle.    
-    print "BottomFlapAngle      |" + BottomFlapAngle.    
+    print "PichDiff             |" + PichDiff.
     print "pichSpeed            |" + pichSpeed.
+    print "PichX1               |" + PichX1.
+    print "FrontFlapAngle       |" + FrontFlapAngle.    
+    print "BackFlapAngle        |" + BackFlapAngle. 
     print "ForeAngleToVel       |" + ForeAngleToVel.
     print "TargetForAngle       |" + TargetForAngle.
-    // print "----------------ROLL--------------------".
-    // print "RollDiff             |" + RollDiff.
-    // print "RollSpeed            |" + RollSpeed.
-    // print "RollOffset           |" + RollOffset.    
-    // print "RollReactionMultiF.  |" + RollReactionMultiFactor.
-    // print "RollBreakMultiFactor |" + RollBreakMultiFactor.
+    print "----------------ROLL--------------------".
+    print "RollDiff             |" + RollDiff.
+    print "RollSpeed            |" + RollSpeed.
+    print "RollOffset           |" + RollOffset.    
+    print "RollReactionMultiF.  |" + RollReactionMultiFactor.
+    print "RollBreakMultiFactor |" + RollBreakMultiFactor.
     print "----------------YAW---------------------".
     print "YawDiff              |" + YawDiff.
     print "YawSpeed             |" + YawSpeed.
+    print "yError               |" + yError.
+    print "ySpeed               |" + ySpeed.
     print "YawOffset            |" + YawOffset.
-    // print "---------NAVIGATION---------------------".TopFlapAngleDefoult
+    print "YawOffset2           |" + YawOffset2.
     print "-----------------LAT--------------------".
     print "LAT                  |" + SHIP:GEOPOSITION:LAT.
     print "LATDiff              |" + LATDiff.
-    // print "LATSpeed             |" + LATSpeed.
-    // print "PichNavCorrection    |" + PichNavCorrection.
     print "-----------------LNG--------------------".
     print "LNG                  |" + SHIP:GEOPOSITION:LNG.
     print "LNGDiff              |" + LNGDiff.
     print "lt                   |" + lt.
     print "lg                   |" + lg.
-    // print "LNGSpeed             |" + LNGSpeed.
-    // print "RollNavCorrection    |" + RollNavCorrection.
-    // print "ship:obt:LAN         |" + ship:obt:LAN.
-    // print "ship:obt:LAN2        |" + ship:obt:longitudeofascendingnode.
-    //print "----------------------------------------".
     print "-------------FLAPS----------------------".
-    print "TLFAngle             |" + TLFAngle.
-    print "TRFAngle             |" + TRFAngle.
-    print "BLFAngle             |" + BLFAngle.
-    print "BRFAngle             |" + BRFAngle. 
-    // print "----------------------------------------".
-    // print "StarToVelAngle       |" +     StarToVelAngle.
-    // print "ForeToVelAngle       |" +     ForeToVelAngle.
-    // print "UpToVelAngle         |" +     UpToVelAngle.
-    // print "TopFlapAngleDefoult  |" +     TopFlapAngleDefoult.
-    // print "BottomFlapAngleDefou.|" +     BottomFlapAngleDefoult.
+    print "FRAngle              |" + FRAngle.
+    print "FLAngle              |" + FLAngle.
+    print "BRAngle              |" + BRAngle.
+    print "BLAngle              |" + BLAngle. 
     print "----------------------------------------".
     print "periapsis            |" +     SHIP:orbit:periapsis.
     print "alt:radar            |" +     alt:radar.
@@ -341,4 +327,31 @@ function DrawVec{
     // set xAxis to VECDRAWARGS( geo, V(200000,0,0), RGB(1.0,0.5,0.5), "X axis", 5, TRUE ).
     // set yAxis to VECDRAWARGS( geo, V(0,200000,0), RGB(0.5,1.0,0.5), "Y axis", 5, TRUE ).
     // set zAxis to VECDRAWARGS( geo, V(0,0,200000), RGB(0.5,0.5,1.0), "Z axis", 5, TRUE ).
-}.
+}
+
+function Flap_FR_Set {
+    parameter num.
+    SHIP:PARTSNAMED("SS.21.FF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.FF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}
+
+function Flap_FL_Set {
+    parameter num.
+    SHIP:PARTSNAMED("SS.21.FF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.FF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}
+
+function Flap_RR_Set {
+    parameter num.
+    SHIP:PARTSNAMED("SS.21.RF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.RF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}
+
+function Flap_RL_Set {
+    parameter num.
+    SHIP:PARTSNAMED("SS.21.RF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.RF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}
+
+
+

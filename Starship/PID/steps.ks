@@ -1,3 +1,12 @@
+function step_PID {
+    //GetTelemetry().
+    SetFlapsVac().
+    printComp(). 
+
+
+
+	
+}
 
 function step_Orbit {
     GetTelemetry().
@@ -13,7 +22,7 @@ function step_Deorbit_burn {
     GetTelemetry().
     printComp().  
     RCS ON.    
-    
+      
     if (SHIP:GEOPOSITION:LNG>138){
         LOCK STEERING TO retrograde.
     } 
@@ -57,7 +66,7 @@ function step_Descent {
         }
         SetFlapsVac().
 
-        if ship:altitude <750{
+        if alt:radar <1750{
 	        SET step TO false. //kill step.
         }
     }
@@ -69,13 +78,14 @@ function step_Flip_to_up {
     GetTelemetry().
     LOCK STEERING TO Up + R(0,0,180).
 
-    partlist[BRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bootom right
-    partlist[BLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//bottom left
+    Flap_FR_Set(MinFlapAngle).
+    Flap_FL_Set(MinFlapAngle).
+    Flap_RR_Set(MaxFlapAngle).
+    Flap_RL_Set(MaxFlapAngle).
 
-    partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top right
-    partlist[TLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top left
 
-    if ForeAngle<60{
+
+    if ForeAngle<75{
 	    SET step TO false. //kill step.
     }
 }
@@ -88,28 +98,39 @@ function step_Land {
     set xp to 4000.
     set lt to (LATDiff*xp) * -1.
     set lg to (LNGDiff*xp) * -1.
-    set lt to 0.
-    set lg to 0.
 
     LOCK STEERING TO SRFRETROGRADE+ R(lt,lg,180).
-    partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top right
-    partlist[TLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top left
+    Flap_FR_Set(MinFlapAngle).
+    Flap_FL_Set(MinFlapAngle).
+    Flap_RR_Set(MaxFlapAngle).
+    Flap_RL_Set(MaxFlapAngle).
     set th to 1 / (  50 /  -ship:VERTICALSPEED).
     if alt:radar < 100{
         GEAR ON.
-    partlist[BRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bootom right
-    partlist[BLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle+20).//bottom left
+
     }
     if alt:radar < 65{
+        Flap_FR_Set(MaxFlapAngle).
+        Flap_FL_Set(MaxFlapAngle).
+        Flap_RR_Set(MaxFlapAngle).
+        Flap_RL_Set(MaxFlapAngle).
         set th to th + (-ship:VERTICALSPEED/5).
         LOCK STEERING TO Up + R(0,0,180).
     }
     if alt:radar < 35{
+        Flap_FR_Set(MaxFlapAngle).
+        Flap_FL_Set(MaxFlapAngle).
+        Flap_RR_Set(MaxFlapAngle).
+        Flap_RL_Set(MaxFlapAngle).
         set th to th + (-ship:VERTICALSPEED/8).
         LOCK STEERING TO Up + R(0,0,180).
     }
     LOCK throttle to th.
     if alt:radar<22.5{
+        Flap_FR_Set(MaxFlapAngle).
+        Flap_FL_Set(MaxFlapAngle).
+        Flap_RR_Set(MaxFlapAngle).
+        Flap_RL_Set(MaxFlapAngle).
 	    SET step TO false. //kill step.
     }
 }

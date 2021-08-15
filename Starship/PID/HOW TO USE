@@ -1,0 +1,5 @@
+- make sure you have instaled kOS mod. easiest way is by using CKAN - https://github.com/KSP-CKAN/CKAN/releases
+- move a "boot.ks" file in to the "YourGameRootFolder\Ships\Script\boot" folder.
+- move a "Main.ks" filt in to the "YourGameRootFolder\Ships\Script\boot\kOS\Starship" folder.
+- move all craft files in to the "YourGameRootFolder\Ships\VAB" folder.
+- run game in snadbox mod, load SN1-7 craft and LUNCH ;)
