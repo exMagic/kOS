@@ -10,7 +10,11 @@ function GetTelemetry{
 
 
     if (ship:GROUNDSPEED<1000){
+<<<<<<< HEAD
         if (TargetForAngle < 84){
+=======
+        if (TargetForAngle < 90){
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
             
             set TargetForAngle to TargetForAngle+0.1.
             
@@ -172,6 +176,7 @@ function printComp{
     print "TRF                  |" +     TRF.
     print "TRErrorBreakMultiFa. |" +     TRErrorBreakMultiFactor.
     print "----------------------------------------".
+<<<<<<< HEAD
     print "fr                         |" +     fr.
     print "PitchReactionMultiFactor   |" +     PitchReactionMultiFactor.
     print "yml                        |" +     yml.
@@ -186,6 +191,20 @@ function printComp{
     // print "AngVelToNorth        |" +     AngVelToNorth.
     // print "AngPadToNorth        |" +     AngPadToNorth.
     //print "_Pich................|" +     _Pich.
+=======
+    print "_is                  |" +     _is.
+    print "Xs                   |" +     Xs.
+    print "mylist:length        |" +     mylist:length.
+    print "_lng                 |" +     _lng.
+    print "_alt                 |" +     _alt.
+    print "_lng2                |" +     _lng2.
+    print "_alt2                |" +     _alt2.
+    print "yml                  |" +     yml.
+    print "myYAW                |" +     myYAW.
+    // print "AngVelToNorth        |" +     AngVelToNorth.
+    // print "AngPadToNorth        |" +     AngPadToNorth.
+    print "_Pich................|" +     _Pich.
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
     // print "AngPadToUp___________|" +     AngPadToUp.
     // print "AngVelToUp___________|" +     AngVelToUp.
     // print "frt .................|" +     frt.

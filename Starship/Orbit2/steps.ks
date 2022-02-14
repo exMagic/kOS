@@ -13,7 +13,11 @@ function step_Deorbit_burn {
     GetTelemetry().
     printComp().  
     RCS ON.    
+<<<<<<< HEAD
       
+=======
+    
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
     if (SHIP:GEOPOSITION:LNG>138){
         LOCK STEERING TO retrograde.
     } 
@@ -88,6 +92,8 @@ function step_Land {
     set xp to 4000.
     set lt to (LATDiff*xp) * -1.
     set lg to (LNGDiff*xp) * -1.
+    set lt to 0.
+    set lg to 0.
 
     LOCK STEERING TO SRFRETROGRADE+ R(lt,lg,180).
     partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MinFlapAngle).//top right

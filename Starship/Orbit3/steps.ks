@@ -57,7 +57,11 @@ function step_Descent {
         }
         SetFlapsVac().
 
+<<<<<<< HEAD
         if alt:radar <1450{
+=======
+        if alt:radar <2750{
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 	        SET step TO false. //kill step.
         }
     }
@@ -100,26 +104,49 @@ function step_Land {
     Flap_RR_Set(MaxFlapAngle).
     Flap_RL_Set(MaxFlapAngle).
     set th to 1 / (  20 /  -ship:VERTICALSPEED).
+<<<<<<< HEAD
 
     if alt:radar < 135{
+=======
+    if alt:radar < 100{
+        GEAR ON.
+
+    }
+    if alt:radar < 65{
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
         Flap_FR_Set(MaxFlapAngle).
         Flap_FL_Set(MaxFlapAngle).
         Flap_RR_Set(MaxFlapAngle).
         Flap_RL_Set(MaxFlapAngle).
+<<<<<<< HEAD
         set th to th + (-ship:VERTICALSPEED/6).
         LOCK STEERING TO Up + R(0,0,180).
     }
     if alt:radar < 85{
         GEAR ON.
+=======
+        set th to th + (-ship:VERTICALSPEED/5).
+        LOCK STEERING TO Up + R(0,0,180).
+    }
+    if alt:radar < 35{
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
         Flap_FR_Set(MaxFlapAngle).
         Flap_FL_Set(MaxFlapAngle).
         Flap_RR_Set(MaxFlapAngle).
         Flap_RL_Set(MaxFlapAngle).
+<<<<<<< HEAD
         set th to th + (-ship:VERTICALSPEED/9).
         LOCK STEERING TO Up + R(0,0,180).
     }
     LOCK throttle to th.
     if alt:radar<38{
+=======
+        set th to th + (-ship:VERTICALSPEED/8).
+        LOCK STEERING TO Up + R(0,0,180).
+    }
+    LOCK throttle to th.
+    if alt:radar<22.5{
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
         Flap_FR_Set(MaxFlapAngle).
         Flap_FL_Set(MaxFlapAngle).
         Flap_RR_Set(MaxFlapAngle).

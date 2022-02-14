@@ -14,10 +14,10 @@ function GetTelemetry{
             
         }
     }
-    if (ship:GROUNDSPEED<800 and TopFlapAngleDefoult>140){       
-        set TopFlapAngleDefoult to TopFlapAngleDefoult - 0.2.
-        set BottomFlapAngleDefoult to BottomFlapAngleDefoult - 0.2.
-    }
+    // if (ship:GROUNDSPEED<800 and TopFlapAngleDefoult>140){       
+    //     set TopFlapAngleDefoult to TopFlapAngleDefoult - 0.2.
+    //     set BottomFlapAngleDefoult to BottomFlapAngleDefoult - 0.2.
+    // }
 
     if (time:seconds-lastCount>0.1){
         set lastCount to  time:seconds.
@@ -147,8 +147,8 @@ function printComp{
     // print "RollBreakMultiFactor |" + RollBreakMultiFactor.
     print "----------------YAW---------------------".
     print "YawDiff              |" + YawDiff.
-    print "YawSpeed             |" + YawSpeed.
-    print "YawOffset            |" + YawOffset.
+    //print "YawSpeed             |" + YawSpeed.
+    print "YawOffset2            |" + YawOffset2.
     // print "---------NAVIGATION---------------------".TopFlapAngleDefoult
     print "-----------------LAT--------------------".
     print "LAT                  |" + SHIP:GEOPOSITION:LAT.
@@ -166,10 +166,10 @@ function printComp{
     // print "ship:obt:LAN2        |" + ship:obt:longitudeofascendingnode.
     //print "----------------------------------------".
     print "-------------FLAPS----------------------".
-    print "TLFAngle             |" + TLFAngle.
-    print "TRFAngle             |" + TRFAngle.
-    print "BLFAngle             |" + BLFAngle.
-    print "BRFAngle             |" + BRFAngle. 
+    print "FLAngle              |" + FLAngle.
+    print "FRAngle              |" + FRAngle.
+    print "BLAngle              |" + BLAngle.
+    print "BRAngle              |" + BRAngle. 
     // print "----------------------------------------".
     // print "StarToVelAngle       |" +     StarToVelAngle.
     // print "ForeToVelAngle       |" +     ForeToVelAngle.
@@ -180,6 +180,7 @@ function printComp{
     print "periapsis            |" +     SHIP:orbit:periapsis.
     print "alt:radar            |" +     alt:radar.
     //print "GroundALT            |" +     GroundALT.
+<<<<<<< HEAD
     print "TRError              |" +     TRError.
     print "TRError2             |" +     TRError2.
     print "TRErrorSpeed         |" +     TRErrorSpeed.
@@ -193,17 +194,32 @@ function printComp{
     print "_alt                 |" +     _alt.
     print "_lng2                |" +     _lng2.
     print "_alt2                |" +     _alt2.
+=======
+    // print "TRError              |" +     TRError.
+    // print "TRError2             |" +     TRError2.
+    // print "TRErrorSpeed         |" +     TRErrorSpeed.
+    // print "TRF                  |" +     TRF.
+    // print "TRErrorBreakMultiFa. |" +     TRErrorBreakMultiFactor.
+    // print "----------------------------------------".
+    // print "_is                  |" +     _is.
+    // print "Xs                   |" +     Xs.
+    // print "mylist:length        |" +     mylist:length.
+    // print "_lng                 |" +     _lng.
+    // print "_alt                 |" +     _alt.
+    // print "_lng2                |" +     _lng2.
+    // print "_alt2                |" +     _alt2.
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
     print "yml                  |" +     yml.
-    print "myYAW                |" +     myYAW.
+    //print "myYAW                |" +     myYAW.
     // print "AngVelToNorth        |" +     AngVelToNorth.
     // print "AngPadToNorth        |" +     AngPadToNorth.
-    print "_Pich................|" +     _Pich.
+    //print "_Pich................|" +     _Pich.
     // print "AngPadToUp___________|" +     AngPadToUp.
     // print "AngVelToUp___________|" +     AngVelToUp.
     // print "frt .................|" +     frt.
     // print "frt0 ................|" +     frt0.
 
-     set _Pich to AngPadToUp - AngVelToUp.
+     //set _Pich to AngPadToUp - AngVelToUp.
 
 
 
@@ -341,4 +357,37 @@ function DrawVec{
     // set xAxis to VECDRAWARGS( geo, V(200000,0,0), RGB(1.0,0.5,0.5), "X axis", 5, TRUE ).
     // set yAxis to VECDRAWARGS( geo, V(0,200000,0), RGB(0.5,1.0,0.5), "Y axis", 5, TRUE ).
     // set zAxis to VECDRAWARGS( geo, V(0,0,200000), RGB(0.5,0.5,1.0), "Z axis", 5, TRUE ).
-}.
+}
+// partlist[BRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//bootom right
+// partlist[BLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//bottom left
+// partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top right
+// partlist[TLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", MaxFlapAngle).//top left
+
+
+function Flap_FR_Set {
+    parameter num.
+    partlist[TRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", num).//top right
+    //SHIP:PARTSNAMED("SS.21.FF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.FF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}
+
+function Flap_FL_Set {
+    parameter num.
+    partlist[TLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", num).//top left
+    //SHIP:PARTSNAMED("SS.21.FF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.FF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}
+
+function Flap_RR_Set {
+    parameter num.
+    partlist[BRFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", num).//bootom right
+    //SHIP:PARTSNAMED("SS.21.RF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.RF.R")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}
+
+function Flap_RL_Set {
+    parameter num.
+    partlist[BLFIndex]:GETMODULE("ModuleRoboticServoHinge"):SETFIELD("Target Angle", num).//bottom left
+    //SHIP:PARTSNAMED("SS.21.RF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+    //SHIP:PARTSNAMED("TE2.19.SS.RF.L")[0]:GETMODULE("ModuleTundraControlSurface"):SETFIELD("Deploy Angle",num).
+}

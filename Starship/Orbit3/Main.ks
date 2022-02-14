@@ -3,9 +3,12 @@ RUNONCEPATH("0:/boot/kOS/Starship/Orbit3/trajectory.ks").
 RUNONCEPATH("0:/boot/kOS/Starship/Orbit3/functions.ks").
 RUNONCEPATH("0:/boot/kOS/Starship/Orbit3/steps.ks").
 
+<<<<<<< HEAD
 global fr is 0.
 global BackFlapMultiFactor is 0.
 global PitchReactionMultiFactor is 0.
+=======
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 global yml is 0.
 global lt is 0.
 global lg is 0.
@@ -104,9 +107,15 @@ global BackFlapAngle is 0.
 
 global MaxFlapAngle is 80.
 global MinFlapAngle is 0.
+<<<<<<< HEAD
 global FrontFlapAngleDefoult is 0.
 global BackFlapAngleDefoult is 0.
 global TargetForAngle is 70.
+=======
+global FrontFlapAngleDefoult is 55.
+global BackFlapAngleDefoult is 55.
+global TargetForAngle is 63.
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 
 global GroundALT is 0.
 
@@ -120,6 +129,7 @@ UNTIL mylist[Xs] <30000 {
     set Xs to Xs +2.
 }
 
+<<<<<<< HEAD
 SET Kp TO 1.5.
 SET Ki TO 0.
 SET Kd TO 1.5.
@@ -138,15 +148,30 @@ SET PIDROLL:SETPOINT TO 0.
 
 // runstep("Orbit",step_Orbit@).
 // runstep("Deorbit_burn",step_Deorbit_burn@).
+=======
+
+SET step TO "Orbit".
+stage.
+runstep("Orbit",step_Orbit@).
+runstep("Deorbit_burn",step_Deorbit_burn@).
+runstep("Descent",step_Descent@).
+runstep("Flip_to_up",step_Flip_to_up@).
+runstep("Land",step_Land@).
+
+// SET step TO "Descent".
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 // runstep("Descent",step_Descent@).
 // runstep("Flip_to_up",step_Flip_to_up@).
 // runstep("Land",step_Land@).
 
+<<<<<<< HEAD
 SET step TO "Descent".
 runstep("Descent",step_Descent@).
 runstep("Flip_to_up",step_Flip_to_up@).
 runstep("Land",step_Land@).
 
+=======
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 
 
 
@@ -174,6 +199,7 @@ function GetForeAngleToVel{
 
 function SetFlapsVac{
 
+<<<<<<< HEAD
 
 
 
@@ -215,6 +241,39 @@ function SetFlapsVac{
     set FrontFlapAngle to MAX(MIN(FrontFlapAngle,MaxFlapAngle),MinFlapAngle).        
     set BackFlapAngle to MAX(MIN(BackFlapAngle,MaxFlapAngle),MinFlapAngle).
 
+=======
+    /////////////////////////////////////////////////////
+    // -- PICH
+    local PitchReactionMultiFactor is 1.5.
+    local PitchBreakMultiFactor is 11.    
+    
+    // if (TRError2<>0){
+    //     set TRErrorBreakMultiFactor to (1/TRError2) * 2.
+    // }
+    // else{
+    //     set TRErrorBreakMultiFactor to 2.
+    // }
+
+    // local limit is 30.
+    // set fr to 15.
+    // if (SHIP:altitude<15000){
+    //     set fr to 8.
+    //     set limit to 24.
+    // }
+    // set TRError2 to MAX(MIN(TRError/fr,limit),-limit).        
+    // //set TRError2 to 0.      
+    // set TRErrorBreak to TRErrorSpeed*TRErrorBreakMultiFactor.
+    // //set TRErrorBreak to MAX(MIN(TRErrorBreak,TRError2),-TRError2).
+    // set TRF to 0.// + TRErrorBreak.
+    SET PichDiff to  ForeToVelAngle -TargetForAngle.
+    SET PichX1 to (PichDiff * PitchReactionMultiFactor) - (pichSpeed * PitchBreakMultiFactor).    
+
+    set FrontFlapAngle to FrontFlapAngleDefoult + PichX1.
+    set BackFlapAngle to BackFlapAngleDefoult - PichX1.    
+
+    set FrontFlapAngle to MAX(MIN(FrontFlapAngle,MaxFlapAngle),MinFlapAngle).        
+    set BackFlapAngle to MAX(MIN(BackFlapAngle,MaxFlapAngle),MinFlapAngle).     
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
     
     /////////////////////////////////////////////////////
     // -- ROLL
@@ -222,19 +281,27 @@ function SetFlapsVac{
     set RollBreakMultiFactor to 0.   
 
     set RollDiff to StarToVelAngle -90.   
+<<<<<<< HEAD
     // set RollOffset to (RollDiff   * RollReactionMultiFactor) + (RollSpeed* RollBreakMultiFactor). 
 
     SET RollOffset TO PIDROLL:UPDATE(TIME:SECONDS, - RollDiff).
     set RollOffset to MAX(MIN(RollOffset,20),-20).   
     set RollOffset to 0.   
 
+=======
+    set RollOffset to (RollDiff   * RollReactionMultiFactor) + (RollSpeed* RollBreakMultiFactor). 
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 
     /////////////////////////////////////////////////////
     // -- YAW
     local YawReactionMultiFactor is 0.9.
     local YawBreakMultiFactor is 30.
 
+<<<<<<< HEAD
     if (SHIP:altitude>9000){
+=======
+    if (SHIP:altitude>10000){
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
         set Va to VCRS(SHIP:VELOCITY:surface, SHIP:up:vector).
     }else{
         set Va to ship:north:vector.
@@ -260,6 +327,13 @@ function SetFlapsVac{
 
     set myYAW to MAX(MIN((AngPadToNorth-AngVelToNorth)*myYAWMultifactor, myYAWLimit),-myYAWLimit).
     set myYAW to 0.
+<<<<<<< HEAD
+=======
+    // if (SHIP:altitude>53000){
+    //     set myYAW to 0.
+    // }
+    //set myYAW to 0.   
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 
     if (SHIP:altitude<15000){
         set YawDiff to VANG(ship:facing:forevector,ship:north:vector)-90.
@@ -275,6 +349,7 @@ function SetFlapsVac{
     //     set yml to 3.
     // }
 
+<<<<<<< HEAD
     //set yml to 3.
 
     set YawOffset to (yError + ySpeed - myYAW).   
@@ -286,6 +361,24 @@ function SetFlapsVac{
     SET YawOffset2 TO PID:UPDATE(TIME:SECONDS, - YawDiff).
     set YawOffset2 to MAX(MIN(YawOffset2,30),-30).     
 
+=======
+    set yml to SHIP:altitude - (SHIP:altitude/1.0002) -1.9.
+    set yml to MAX(MIN(yml,4),3.5).
+    //set yml to 3.
+
+    set YawOffset to (yError + ySpeed - myYAW).
+    
+    // set ys to abs(ySpeed).
+    // if(ys>0){
+    //     set YawOffset to yError / (ys*2) - myYAW.
+    // }else{
+    //     set YawOffset to yError - myYAW.
+    // }
+
+    set YawOffset to MAX(MIN(YawOffset,30),-30).     
+
+    set YawOffset2 to YawOffset*yml.
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
     ///////////////////////////////////////////////////
     ///////////////////////////////////////// SET FLAPS
     ///////////////////////////////////////////////////
@@ -294,8 +387,13 @@ function SetFlapsVac{
     set FLAngle to FrontFlapAngle - YawOffset2 - RollOffset.
     set FRAngle to FrontFlapAngle + YawOffset2 + RollOffset.
 
+<<<<<<< HEAD
     set BLAngle to BackFlapAngle + YawOffset2*BackFlapMultiFactor - RollOffset.
     set BRAngle to BackFlapAngle - YawOffset2*BackFlapMultiFactor + RollOffset.
+=======
+    set BLAngle to BackFlapAngle + YawOffset2/4 - RollOffset.
+    set BRAngle to BackFlapAngle - YawOffset2/4 + RollOffset.
+>>>>>>> 3a59e188f02236f8b0ced972b63fde070a9fac00
 
 
     set FLAngle to MAX(MIN(FLAngle,MaxFlapAngle),MinFlapAngle).        
